@@ -1,0 +1,48 @@
+body{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+
+}
+
+.box_container {
+    padding: 10px 0 0 10px;
+    margin: 1px;
+    border-radius: 5px;
+    background: white;
+
+}
+
+.box_container:hover {
+    background:  #e9e9e9;
+}
+
+.main_box{
+    background: #e0e0e0;
+    padding: 3px;
+    border-radius: 5px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr ;
+    grid-template-rows: 1fr 1fr 1fr ;
+    gap: 2px 2px;
+    grid-template-areas:
+    ". . ."
+    ". . ."
+    ". . ."
+}
+
+.container {
+    padding: 8px;
+    border-radius: 5px;
+    background: #e0e0e0;
+    width: 600px;
+    height: 600px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr ;
+    grid-template-rows: 1fr 1fr 1fr ;
+    gap: 4px 4px;
+    grid-template-areas:
+    ". . ."
+    ". . ."
+    ". . ."
+}
