@@ -1,4 +1,6 @@
 let player = 'X';
+let currentMainBox;
+let prevMainBox = 0;
 let subGameBoard = generateGameBoard();
 let mainGameBoard = generateGameBoard();
 let mainBoxesMap = {
@@ -24,35 +26,36 @@ function changePlayer() {
     player === 'X' ? player = 'O' : player = 'X';
 }
 
-function checkWinner(board, player) {
-    if(board[0][0] !== player && board[0][0] === board[0][1] && board[0][1] === board[0][2])
+function checkWinner(board) {
+    if(board[0][0] !== undefined && board[0][0] === board[0][1] && board[0][1] === board[0][2])
         return true;
 
-    if(board[1][0] !== player && board[1][0] === board[1][1] && board[1][1] === board[1][2])
+    if(board[1][0] !== undefined && board[1][0] === board[1][1] && board[1][1] === board[1][2])
         return true;
 
-    if(board[2][0] !== player && board[2][0] === board[2][1] && board[2][1] === board[2][2])
+    if(board[2][0] !== undefined && board[2][0] === board[2][1] && board[2][1] === board[2][2])
         return true;
 
-    if(board[0][0] !== player && board[0][0] === board[1][0] && board[1][0] === board[2][0])
+    if(board[0][0] !==undefined && board[0][0] === board[1][0] && board[1][0] === board[2][0])
         return true;
 
-    if(board[0][1] !== player && board[0][1] === board[1][1] && board[1][1] === board[2][1])
+    if(board[0][1] !== undefined && board[0][1] === board[1][1] && board[1][1] === board[2][1])
         return true;
 
-    if(board[0][2] !== player && board[0][2] === board[1][2] && board[1][2] === board[2][2])
+    if(board[0][2] !== undefined && board[0][2] === board[1][2] && board[1][2] === board[2][2])
         return true;
 
-    if(board[0][0] !== player && board[0][0] === board[1][1] && board[1][1] === board[2][2])
+    if(board[0][0] !== undefined && board[0][0] === board[1][1] && board[1][1] === board[2][2])
         return true;
 
-    return board[2][0] !== player && board[2][0] === board[1][1] && board[1][1] === board[0][2];
+    return (board[2][0] !== undefined && board[2][0] === board[1][1] && board[1][1] === board[0][2]);
 
 }
 
 function draw(id) {
-    drawXO(id);
+    drawXO(id, 0,"40px", "40px");
     evaluateSubGame(id);
+    evaluateMainGame();
     changePlayer();
 }
 
@@ -60,44 +63,110 @@ function stalemate(board) {
     let cnt = 0;
     for(let i = 0; i < board.length; i++)
         for(let j = 0; j < board.length; j++){
-            if(board[i][j] === 'X' || board[i][j] === 'O')
+            if(board[i][j] === 'X' || board[i][j] === 'O' || board[i][j] === '=')
                 cnt++;
         }
     return cnt === 9;
 }
 
 function evaluateSubGame(id) {
-    subGameBoard[parseInt(id[1])][parseInt(id[2])] = player;
     let parent = document.getElementById(id).parentNode;
+    currentMainBox = parent.id;
+
+    if(currentMainBox !== prevMainBox){
+        subGameBoard = generateGameBoard();
+        prevMainBox = currentMainBox;
+    }
+
+    lockSubGame(parent);
+    subGameBoard[parseInt(id[1])][parseInt(id[2])] = player;
 
     if(checkWinner(subGameBoard)) {
         mainGameBoard[parseInt(parent.id[0])][parseInt(parent.id[1])] = player;
         parent.style.pointerEvents = "none";
-        parent.style.background = "whitesmoke";
+        parent.style.display = "flex";
+        parent.style.alignItems = "center";
+        parent.style.justifyContent = "center";
+        drawXO(currentMainBox, 1,"120px", "120px");
+        unlockSubGame();
 
     } else if(stalemate(subGameBoard)){
         mainGameBoard[parseInt(parent.id[0])][parseInt(parent.id[1])] = '=';
         parent.style.background = "grey";
         parent.style.pointerEvents = "none";
+        unlockSubGame();
     }
+    console.log(subGameBoard);
 }
 
-function drawXO(id) {
+function drawXO(id, flag, height, width) {
     let div = document.getElementById(id);
 
-    if(div.innerHTML !== '') // check if the box is populated
+    if(div.innerHTML !== '' && flag === 0) // check if the box is populated
         return;
 
+    div.style.pointerEvents = "none";
     let img = document.createElement("img");  //draw image in box
-    img.style.height = "40px";
-    img.style.width = "40px";
+    img.style.height = height;
+    img.style.width = width;
     div.innerHTML = '';
     (player === 'X') ? img.src = "images/cross.png" : img.src = "images/circle.png";
     div.appendChild(img);
 }
 
-function lockSubGame() { //this function is responsible for removing all click events from other boxes
+function lockSubGame(current) { //this function is responsible for removing all click events from other boxes
+    let box;
+    for(let i = 0; i < 3; i++)
+        for(let j = 0; j < 3; j++) {
+            box = document.getElementById(String(i) + String(j));
+            if(box.id === current.id){
+                mainBoxesMap[current.id] = 1;
+                continue;
+            }
 
+            box.style.pointerEvents = "none";
+        }
+}
+
+function unlockSubGame() {
+    let box;
+    for(let i = 0; i < 3; i++)
+        for(let j = 0; j < 3; j++) {
+            box = document.getElementById(String(i) + String(j));
+            if(mainBoxesMap[box.id] === 1) {
+                continue;
+            }
+            box.style.pointerEvents = "";
+        }
+}
+
+function evaluateMainGame() {
+    if(checkWinner(mainGameBoard)){
+        lockSubGame(currentMainBox);
+        console.log(player);
+    } else if(stalemate(mainGameBoard))
+        console.log(checkSpecialWinner(mainGameBoard));
+}
+
+function checkSpecialWinner(board) {
+    let X = 0;
+    let O = 0;
+
+    for(let i = 0; i < 3; i++)
+        for(let j = 0; j < 3; j++) {
+            if(board[i][j] === 'X')
+                X++;
+
+            if(board[i][j] === 'O')
+                O++;
+        }
+
+    if(X > O)
+        return "X";
+    if(O > X)
+        return "O";
+    if(X === O)
+        return "=";
 }
 
 
