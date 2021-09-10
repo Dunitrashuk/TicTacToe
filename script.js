@@ -83,17 +83,12 @@ function evaluateSubGame(id) {
 
     if(checkWinner(subGameBoard)) {
         mainGameBoard[parseInt(parent.id[0])][parseInt(parent.id[1])] = player;
-        parent.style.pointerEvents = "none";
-        parent.style.display = "flex";
-        parent.style.alignItems = "center";
-        parent.style.justifyContent = "center";
-        drawXO(currentMainBox, 1,"120px", "120px");
+        addCss(parent, 1);
         unlockSubGame();
 
     } else if(stalemate(subGameBoard)){
         mainGameBoard[parseInt(parent.id[0])][parseInt(parent.id[1])] = '=';
-        parent.style.background = "grey";
-        parent.style.pointerEvents = "none";
+        addCss(parent, 2);
         unlockSubGame();
     }
     console.log(subGameBoard);
@@ -111,7 +106,20 @@ function drawXO(id, flag, height, width) {
     img.style.width = width;
     div.innerHTML = '';
     (player === 'X') ? img.src = "images/cross.png" : img.src = "images/circle.png";
+
+    if(flag === 2) {
+        img.src = "images/equal.png";
+    }
     div.appendChild(img);
+}
+
+function addCss(parent, flag) {
+    parent.style.pointerEvents = "none";
+    parent.style.display = "flex";
+    parent.style.alignItems = "center";
+    parent.style.justifyContent = "center";
+    parent.style.background = "white";
+    drawXO(currentMainBox, flag,"120px", "120px");
 }
 
 function lockSubGame(current) { //this function is responsible for removing all click events from other boxes
