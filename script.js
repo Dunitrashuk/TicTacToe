@@ -27,28 +27,28 @@ function changePlayer() {
 }
 
 function checkWinner(board) {
-    if(board[0][0] !== undefined && board[0][0] === board[0][1] && board[0][1] === board[0][2])
+    if(board[0][0] !== undefined && board[0][0] !== '=' && board[0][0] === board[0][1] && board[0][1] === board[0][2])
         return true;
 
-    if(board[1][0] !== undefined && board[1][0] === board[1][1] && board[1][1] === board[1][2])
+    if(board[1][0] !== undefined && board[1][0] !== '=' && board[1][0] === board[1][1] && board[1][1] === board[1][2])
         return true;
 
-    if(board[2][0] !== undefined && board[2][0] === board[2][1] && board[2][1] === board[2][2])
+    if(board[2][0] !== undefined && board[2][0] !== '=' && board[2][0] === board[2][1] && board[2][1] === board[2][2])
         return true;
 
-    if(board[0][0] !==undefined && board[0][0] === board[1][0] && board[1][0] === board[2][0])
+    if(board[0][0] !==undefined && board[0][0] !== '=' && board[0][0] === board[1][0] && board[1][0] === board[2][0])
         return true;
 
-    if(board[0][1] !== undefined && board[0][1] === board[1][1] && board[1][1] === board[2][1])
+    if(board[0][1] !== undefined && board[0][1] !== '=' && board[0][1] === board[1][1] && board[1][1] === board[2][1])
         return true;
 
-    if(board[0][2] !== undefined && board[0][2] === board[1][2] && board[1][2] === board[2][2])
+    if(board[0][2] !== undefined && board[0][2] !== '=' && board[0][2] === board[1][2] && board[1][2] === board[2][2])
         return true;
 
-    if(board[0][0] !== undefined && board[0][0] === board[1][1] && board[1][1] === board[2][2])
+    if(board[0][0] !== undefined && board[0][0] !== '=' && board[0][0] === board[1][1] && board[1][1] === board[2][2])
         return true;
 
-    return (board[2][0] !== undefined && board[2][0] === board[1][1] && board[1][1] === board[0][2]);
+    return (board[2][0] !== undefined && board[2][0] !== '=' && board[2][0] === board[1][1] && board[1][1] === board[0][2]);
 
 }
 
@@ -110,6 +110,8 @@ function drawXO(id, flag, height, width) {
     if(flag === 2) {
         img.src = "images/equal.png";
     }
+    div.style.boxShadow = "inset 5px 5px 10px #7b2828,\n" +
+        "    inset -5px -5px 10px #b93c3c";
     div.appendChild(img);
 }
 
@@ -118,7 +120,8 @@ function addCss(parent, flag) {
     parent.style.display = "flex";
     parent.style.alignItems = "center";
     parent.style.justifyContent = "center";
-    parent.style.background = "white";
+    // parent.style.borderStyle = "inset";
+
     drawXO(currentMainBox, flag,"120px", "120px");
 }
 
@@ -149,6 +152,7 @@ function unlockSubGame() {
 }
 
 function evaluateMainGame() {
+    checkEarlyWinner(mainGameBoard);
     if(checkWinner(mainGameBoard)){
         lockSubGame(currentMainBox);
         console.log(player);
@@ -175,6 +179,35 @@ function checkSpecialWinner(board) {
         return "O";
     if(X === O)
         return "=";
+}
+
+function checkEarlyWinner(board) {
+    let X = 0;
+    let O = 0;
+    let equal = 0;
+    let freeBoxes;
+
+    for(let i = 0; i < 3; i++)
+        for(let j = 0; j < 3; j++) {
+            if(board[i][j] === 'X')
+                X++;
+
+            if(board[i][j] === 'O')
+                O++;
+
+            if(board[i][j] === '=')
+                equal++;
+        }
+
+    freeBoxes = 9 - (X + O + equal);
+
+    if(X + equal > O + freeBoxes + equal) {
+        console.log("X");
+        lockSubGame(currentMainBox);
+    } else if(O + equal > X + freeBoxes + equal) {
+        console.log("O");
+        lockSubGame(currentMainBox);
+    }
 }
 
 
